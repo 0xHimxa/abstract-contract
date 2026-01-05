@@ -17,7 +17,7 @@ MinimalAccount minimalAccount = new MinimalAccount(networkConfig.entryPoint);
 minimalAccount.transferOwnership(msg.sender);
 vm.stopBroadcast();
 
- return(helperConfig,minimalAccount)   
+ return(helperConfig,minimalAccount);   
 }
 
 }
