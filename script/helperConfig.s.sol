@@ -9,10 +9,12 @@ contract HelperConfig is Script {
 
    struct NetWorkConfig{
     address entryPoint;
+    address account;
    } 
    uint256 constant sepoliaChainId = 11155111;
    uint256 constant zksyn_sepoliaChainId = 300;
     uint256 constant LOCAL_CHAIN_ID = 31337;
+    address constant BURNER_WALLET = 0xA85926f9598AA43A2D8f24246B5e7886C4A5FeEc;
    NetWorkConfig public localNetworkConfig;
  mapping(uint256 chainid=> NetWorkConfig) public networkConfig;
 
@@ -32,11 +34,8 @@ function getConfigByChainId(uint256 chainId) public view returns (NetWorkConfig 
 if(chainId == LOCAL_CHAIN_ID){
     return localNetworkConfig;
 }
-else if(chainId == sepoliaChainId){
-    return networkConfig[sepoliaChainId];
-}
-else if(chainId == zksyn_sepoliaChainId){
-    return networkConfig[zksyn_sepoliaChainId];
+else if(networkConfig[chainId].account == address(0)){
+    return networkConfig[chainId];
 }
 else{
     revert HelperConfig__InvalidChainId();
@@ -52,9 +51,9 @@ else{
 function getSepoliaConfig() public view returns (NetWorkConfig memory){
 
  return NetWorkConfig({
-            entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
+            entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789,
             //usdc: 0x53844F9577C2334e541Aec7Df7174ECe5dF1fCf0, // Update with your own mock token
-            //account: BURNER_WALLET
+            account: BURNER_WALLET
         });
 }
 
@@ -62,9 +61,9 @@ function getSepoliaConfig() public view returns (NetWorkConfig memory){
 function getZksycConfig() public view returns (NetWorkConfig memory){
 
  return NetWorkConfig({
-            entryPoint: address(0)
+            entryPoint: address(0),
             //usdc: 0x53844F9577C2334e541Aec7Df7174ECe5dF1fCf0, // Update with your own mock token
-            //account: BURNER_WALLET
+            account: BURNER_WALLET
         });
 }
 
