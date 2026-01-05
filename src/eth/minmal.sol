@@ -16,7 +16,25 @@ import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPo
 
 
 contract MinimalAccount is IAccount,Ownable{
+
+error MinimalAccount__NotFromEntryPoint();
+
+
+
     IEntryPoint private immutable i_entrypoint;
+
+
+modifier requireFromEntryPoint(){
+    if(msg.sender != address(i_entrypoint)){
+        revert MinimalAccount__NotFromEntryPoint();
+    }
+    _;
+}
+
+
+
+
+
 
 constructor(address entrypoint)Ownable(msg.sender){
    i_entrypoint = IEntryPoint(entrypoint); 
@@ -28,7 +46,7 @@ constructor(address entrypoint)Ownable(msg.sender){
         PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 missingAccountFunds
-    ) external  returns (uint256 validationData){
+    ) external requireFromEntryPoint  returns (uint256 validationData){
 validationData = _validateSignature(userOp,userOpHash);
 
 // do the validate nounce ur self
@@ -48,7 +66,7 @@ address signer = ECDSA.recover(ethSignedMessageHash, userOp.signature);
   return SIG_VALIDATION_SUCCESS;
     }
 
-
+// this payback the gas the bundler pay
 
     function _payPrefund(uint256 missingAccFunds) internal {
 if(missingAccFunds != 0){
@@ -57,4 +75,8 @@ if(missingAccFunds != 0){
 
 }
     }
+
+
+    function getEntryAddress() external returns(address){
+return address(i_entrypoint)}
 }
