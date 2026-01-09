@@ -13,6 +13,7 @@ HelperConfig helperConfig;
 MinimalAccount minimalAccount;
 ERC20Mock usdc;
 uint256 constant AMOUNT = 1e18;
+address randomUser = makeAddr("randomUser");
 
 function setUp() public{
 DeployMinimal deployMinimal = new DeployMinimal();
@@ -46,6 +47,25 @@ function testOwnerCanExecuteCommands()public{
 
 
 }
+
+
+function testNotOwnerCanNotExecuteCommands()public{
+       assertEq(usdc.balanceOf(address(minimalAccount)),0);
+    address des = address(usdc);
+    uint256 value=0;
+    bytes memory functionData = abi.encodeWithSelector(ERC20Mock.mint.selector,address(minimalAccount),AMOUNT);
+
+    //act
+   vm.prank(randomUser);
+   
+   vm.expectRevert(MinimalAccount.MinimalAccount__NotFromEntryPointOrOwner.selector );
+    minimalAccount.execute(des,value,functionData);
+    //assert
+
+
+
+}
+
 
 
 }

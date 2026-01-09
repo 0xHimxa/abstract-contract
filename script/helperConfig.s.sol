@@ -16,6 +16,8 @@ contract HelperConfig is Script {
    uint256 constant zksyn_sepoliaChainId = 300;
     uint256 constant LOCAL_CHAIN_ID = 31337;
     address constant BURNER_WALLET = 0xA85926f9598AA43A2D8f24246B5e7886C4A5FeEc;
+  address constant FOUNDRY_DEFAULT_SENDER = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
+
    NetWorkConfig public localNetworkConfig;
  mapping(uint256 chainid=> NetWorkConfig) public networkConfig;
 
@@ -75,6 +77,7 @@ if(localNetworkConfig.entryPoint== address(0)){
 }
 
 //deploy mock
+//return NetWorkConfig({entrypoint:address(0), account: FOUNDRY_DEFAULT_SENDER});
 }
 
 
