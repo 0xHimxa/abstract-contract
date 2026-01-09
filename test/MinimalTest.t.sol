@@ -11,17 +11,41 @@ import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 contract MinimalAccountTest is Test{
 HelperConfig helperConfig;
 MinimalAccount minimalAccount;
-
+ERC20Mock usdc;
+uint256 constant AMOUNT = 1e18;
 
 function setUp() public{
 DeployMinimal deployMinimal = new DeployMinimal();
 
 ( helperConfig, minimalAccount) = deployMinimal.deployMinimalAccount();
-
+usdc = new ERC20Mock();
 }
 
 
+//uscc mint
+//approve some amount
+//usdc contract
+//come from the entry points
 
+
+function testOwnerCanExecuteCommands()public{
+    //arrage
+    assertEq(usdc.balanceOf(address(minimalAccount)),0);
+    address des = address(usdc);
+    uint256 value=0;
+    bytes memory functionData = abi.encodeWithSelector(ERC20Mock.mint.selector,address(minimalAccount),AMOUNT);
+
+    //act
+    vm.prank(minimalAccount.owner());
+    minimalAccount.execute(des,value,functionData);
+    //assert
+
+    assertEq(usdc.balanceOf(address(minimalAccount)),AMOUNT);
+
+
+
+
+}
 
 
 }
