@@ -12,12 +12,13 @@ contract SendPackedUserOp is Script {
 
     function run() public {}
 
-    function generateSignedUserOperation(bytes memory callData, HelperConfig.NetWorkConfig memory config)
+    function generateSignedUserOperation(bytes memory callData, HelperConfig.NetWorkConfig memory config,address _sender)
         public
         returns (PackedUserOperation memory)
     {
-        uint256 nonce = vm.getNonce(config.account);
-        PackedUserOperation memory userOp = _generateUserOperation(callData, config.account, nonce);
+        //note sender cant be EOA it have to be the minimal contract address for the user
+        uint256 nonce = IEntryPoint(config.entryPoint).getNonce(_sender, 0); 
+        PackedUserOperation memory userOp = _generateUserOperation(callData, _sender, nonce);
 
         //sign it and returned
         bytes32 userOpHash = IEntryPoint(config.entryPoint).getUserOpHash(userOp);
