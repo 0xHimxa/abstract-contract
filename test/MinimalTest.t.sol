@@ -77,6 +77,43 @@ contract MinimalAccountTest is Test {
         bytes32 userOpHash = IEntryPoint(helperConfig.getConfig().entryPoint).getUserOpHash(packedUserOp);
 
         address signer = ECDSA.recover(userOpHash.toEthSignedMessageHash(), packedUserOp.signature);
+       
         assertEq(signer, minimalAccount.owner());
     }
+
+
+//1. Sign user ops
+//2.Call validate userops
+//3. Assert the return is correct;
+
+function testValidateOfUserOps() public{
+         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
+        address des = address(usdc);
+        uint256 value = 0;
+        bytes memory functionData = abi.encodeWithSelector(ERC20Mock.mint.selector, address(minimalAccount), AMOUNT);
+        bytes memory exuteCallData = abi.encodeWithSelector(MinimalAccount.execute.selector, des, value, functionData);
+
+        PackedUserOperation memory packedUserOp =
+            sendPakedUserOp.generateSignedUserOperation(exuteCallData, helperConfig.getConfig());
+
+        bytes32 userOpHash = IEntryPoint(helperConfig.getConfig().entryPoint).getUserOpHash(packedUserOp);
+uint256 missingAccountFunds = 1e18;
+
+
+//act
+vm.prank(helperConfig.getConfig().entryPoint);
+uint256 validationData = minimalAccount.validateUserOp(packedUserOp, userOpHash, missingAccountFunds);
+//assert
+ assertEq(validationData, 0);
+
+}
+
+
+ 
+ f
+
+
+
+
+
 }
