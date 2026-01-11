@@ -16,8 +16,8 @@ contract HelperConfig is Script {
     uint256 constant zksyn_sepoliaChainId = 300;
     uint256 constant LOCAL_CHAIN_ID = 31337;
     address constant BURNER_WALLET = 0xA85926f9598AA43A2D8f24246B5e7886C4A5FeEc;
-  //  address constant FOUNDRY_DEFAULT_SENDER = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
- address constant ANVIL_DEFAULT_ACCOUNT =  0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+    //  address constant FOUNDRY_DEFAULT_SENDER = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
+    address constant ANVIL_DEFAULT_ACCOUNT = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
     NetWorkConfig public localNetworkConfig;
     mapping(uint256 chainid => NetWorkConfig) public networkConfig;
 
@@ -66,7 +66,7 @@ contract HelperConfig is Script {
         vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT);
         EntryPoint entryPoint = new EntryPoint();
         vm.stopBroadcast();
-        localNetworkConfig =  NetWorkConfig({entryPoint: address(entryPoint), account: ANVIL_DEFAULT_ACCOUNT});
-    return localNetworkConfig;
+        localNetworkConfig = NetWorkConfig({entryPoint: address(entryPoint), account: ANVIL_DEFAULT_ACCOUNT});
+        return localNetworkConfig;
     }
 }

@@ -12,32 +12,29 @@ contract SendPackedUserOp is Script {
 
     function run() public {}
 
-    function generateSignedUserOperation(bytes memory callData, HelperConfig.NetWorkConfig memory config,address _sender)
-        public
-        returns (PackedUserOperation memory)
-    {
+    function generateSignedUserOperation(
+        bytes memory callData,
+        HelperConfig.NetWorkConfig memory config,
+        address _sender
+    ) public returns (PackedUserOperation memory) {
         //note sender cant be EOA it have to be the minimal contract address for the user
-        uint256 nonce = IEntryPoint(config.entryPoint).getNonce(_sender, 0); 
+        uint256 nonce = IEntryPoint(config.entryPoint).getNonce(_sender, 0);
         PackedUserOperation memory userOp = _generateUserOperation(callData, _sender, nonce);
 
         //sign it and returned
         bytes32 userOpHash = IEntryPoint(config.entryPoint).getUserOpHash(userOp);
         bytes32 digest = userOpHash.toEthSignedMessageHash();
 
- 
-  uint8 v;
- bytes32 r;
- bytes32 s;
-uint256 ANIVIL_DEFAULT_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
- if(block.chainid == 31337){
-  (v,r,s) = vm.sign(ANIVIL_DEFAULT_KEY, digest);
- }else{
-     ( v, r,  s) = vm.sign(config.account, digest);
- }
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        uint256 ANIVIL_DEFAULT_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
+        if (block.chainid == 31337) {
+            (v, r, s) = vm.sign(ANIVIL_DEFAULT_KEY, digest);
+        } else {
+            (v, r, s) = vm.sign(config.account, digest);
+        }
 
-
-
-     
         userOp.signature = abi.encodePacked(r, s, v); // Note the order Here
 
         return userOp;
