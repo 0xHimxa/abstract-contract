@@ -66,7 +66,7 @@ error ZkMinimalAccount__NotFromBootloader();
 error ZkMinimalAccount__ExecutionFailed();
 error ZkMinimalAccount__NotFromBootloaderOrOwner();
 error ZkMinimalAccount__FailedToPay();
-
+error ZkMinimalAccount__InvalidSignature();
 
 
 
@@ -128,7 +128,7 @@ receive() external payable{}
         external
         payable requireFromBootloader returns(bytes4 magic){
 
-_validateTransaction(_transaction);
+return _validateTransaction(_transaction);
 
         }
 
@@ -143,9 +143,13 @@ _validateTransaction(_transaction);
 
     // There is no point in providing possible signed hash in the `executeTransactionFromOutside` method,
     // since it typically should not be trusted.
-    function executeTransactionFromOutside(Transaction calldata _transaction) external payable returns(bytes4 magic){
-      magic =  _validateTransaction(_transaction);
+    function executeTransactionFromOutside(Transaction calldata _transaction) external payable{
+     bytes4 magic = _validateTransaction(_transaction);
+        if (magic != ACCOUNT_VALIDATION_SUCCESS_MAGIC) {
+            revert ZkMinimalAccount__InvalidSignature();
+        }
         _excuteTransaction(_transaction);
+      
     }
 
     function payForTransaction(bytes32 /*_txHash*/, bytes32 /*_suggestedSignedHash*/, Transaction calldata _transaction)
@@ -163,7 +167,7 @@ _validateTransaction(_transaction);
         payable{}
 
 
-function _validateTransaction(Transaction memory _transaction,)internal returns(bytes4 magic){
+function _validateTransaction(Transaction memory _transaction)internal returns(bytes4 magic){
 
 //call nonceholder
 //increment nonce
@@ -183,16 +187,16 @@ if(totalRequiredBalance > address(this).balance){
 
 //check the signature 
 bytes32 txHash = _transaction.encodeHash();
- bytes32 convertedHash = MessageHashUtils.toEthSignedMessageHash(_transaction.signature,txHash)
+ //bytes32 convertedHash = MessageHashUtils.toEthSignedMessageHash(_transaction.signature,txHash);
 
-address signer = ECDSA.recover(convertedHash,_transaction.signature);
+address signer = ECDSA.recover(txHash,_transaction.signature);
 bool isValidSigner = signer == owner();
 
 
 if(isValidSigner){
     magic = ACCOUNT_VALIDATION_SUCCESS_MAGIC;
 }else{
-    magic = btyes4(0);
+    magic = bytes4(0);
 }
 
 return magic;
