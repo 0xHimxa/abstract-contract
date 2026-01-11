@@ -9,3 +9,10 @@ system contract
 
 
 completed eth account abstraction
+
+
+
+if having evm error while run test on zksysc
+add   --system-mode=true 
+
+to the command
