@@ -62,6 +62,41 @@ using   MemoryTransactionHelper for Transaction;
 
 
 error ZkMinimalAccount__NotEnoughBalance();
+error ZkMinimalAccount__NotFromBootloader();
+error ZkMinimalAccount__ExecutionFailed();
+error ZkMinimalAccount__NotFromBootloaderOrOwner();
+
+
+
+
+
+modifier requireFromBootloader(){
+    if(msg.sender != BOOTLOADER_FORMAL_ADDRESS){
+        revert ZkMinimalAccount__NotFromBootloader();
+    }
+_;
+    }
+
+
+modifier requireFromBootloaderOrOwner(){
+    if(msg.sender != BOOTLOADER_FORMAL_ADDRESS &&msg.sender != owner()){
+        revert ZkMinimalAccount__NotFromBootloaderOrOwner();
+    }
+_;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 constructor()Ownable(msg.sender){
@@ -87,7 +122,7 @@ constructor()Ownable(msg.sender){
 
       function validateTransaction(bytes32, /*_txHash*/ bytes32, /*_suggestedSignedHash*/ Transaction memory _transaction)
         external
-        payable returns(bytes4 magic){
+        payable requireFromBootloader returns(bytes4 magic){
 
 //call nonceholder
 //increment nonce
@@ -124,12 +159,42 @@ return magic;
 
         }
 
-    function executeTransaction(bytes32 _txHash, bytes32 _suggestedSignedHash, Transaction calldata _transaction)
+    function executeTransaction(bytes32 /*_txHash*/, bytes32 /*_suggestedSignedHash*/, Transaction calldata _transaction)
         external
-        payable{
+        payable requireFromBootloaderOrOwner{
+
+address to = address(uint160(_transaction.to));
+uint128 value = Utils.safeCastToU128(_transaction.value);
+bytes memory data = _transaction.data;
+
+
+if(to == address(DEPLOYER_SYSTEM_CONTRACT)){
+    uint32 gas = Utils.safeCastToU32(gasleft());
+    SystemContractsCaller.systemCallWithPropagatedRevert(gas,to,value,data);
+
+
+}else{
 
 
 
+
+bool success;
+//to me transaction in zksync we do it dis way here
+
+assembly{
+    success:= call(gas(),to,value,add(data,0x20),mload(data),0,0)
+}
+
+if(!success){
+    revert ZkMinimalAccount__ExecutionFailed();
+}
+
+    
+
+}
+
+
+    
         }
 
     // There is no point in providing possible signed hash in the `executeTransactionFromOutside` method,
